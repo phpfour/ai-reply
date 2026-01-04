@@ -1,0 +1,454 @@
+/* Smart Reply Extension Styles */
+
+/* Trigger Button */
+.smart-reply-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.smart-reply-trigger:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+}
+
+.smart-reply-trigger:active {
+  transform: scale(0.95);
+}
+
+.smart-reply-trigger svg {
+  width: 18px;
+  height: 18px;
+}
+
+.smart-reply-trigger.active {
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* Popup Container */
+.smart-reply-popup {
+  position: fixed;
+  z-index: 2147483647;
+  width: 380px;
+  max-height: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06),
+              0 0 0 1px rgba(0, 0, 0, 0.05);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #1f2937;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup {
+    background: #1f2937;
+    color: #f3f4f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                0 2px 4px -1px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Popup Header */
+.smart-reply-popup__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: move;
+  user-select: none;
+  background: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__header {
+    background: #374151;
+    border-bottom-color: #4b5563;
+  }
+}
+
+.smart-reply-popup__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.smart-reply-popup__title svg {
+  width: 18px;
+  height: 18px;
+  color: #6366f1;
+}
+
+.smart-reply-popup__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.smart-reply-popup__close:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__close:hover {
+    background: #4b5563;
+    color: #f3f4f6;
+  }
+}
+
+/* Tone Selector */
+.smart-reply-popup__tones {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__tones {
+    border-bottom-color: #4b5563;
+  }
+}
+
+.smart-reply-popup__tone {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.smart-reply-popup__tone:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.smart-reply-popup__tone.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__tone {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+
+  .smart-reply-popup__tone:hover {
+    border-color: #818cf8;
+    color: #818cf8;
+  }
+
+  .smart-reply-popup__tone.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+  }
+}
+
+/* Content Area */
+.smart-reply-popup__content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Loading State */
+.smart-reply-popup__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  color: #6b7280;
+}
+
+.smart-reply-popup__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error State */
+.smart-reply-popup__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  gap: 12px;
+  text-align: center;
+  color: #ef4444;
+}
+
+.smart-reply-popup__error-icon {
+  width: 40px;
+  height: 40px;
+  color: #ef4444;
+}
+
+.smart-reply-popup__error-message {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.smart-reply-popup__retry {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #6366f1;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.smart-reply-popup__retry:hover {
+  background: #4f46e5;
+}
+
+/* Suggestion Cards */
+.smart-reply-popup__suggestion {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.smart-reply-popup__suggestion:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 1px #6366f1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__suggestion {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .smart-reply-popup__suggestion:hover {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 1px #818cf8;
+  }
+}
+
+.smart-reply-popup__suggestion-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__suggestion-text {
+    color: #f3f4f6;
+  }
+}
+
+.smart-reply-popup__suggestion-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.smart-reply-popup__suggestion-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.smart-reply-popup__suggestion-btn--copy {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.smart-reply-popup__suggestion-btn--copy:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.smart-reply-popup__suggestion-btn--insert {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.smart-reply-popup__suggestion-btn--insert:hover {
+  background: #4f46e5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__suggestion-btn--copy {
+    background: #4b5563;
+    color: #d1d5db;
+  }
+
+  .smart-reply-popup__suggestion-btn--copy:hover {
+    background: #6b7280;
+    color: #f3f4f6;
+  }
+}
+
+.smart-reply-popup__suggestion-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Footer */
+.smart-reply-popup__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-reply-popup__footer {
+    background: #374151;
+    border-top-color: #4b5563;
+  }
+}
+
+.smart-reply-popup__regenerate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.smart-reply-popup__regenerate:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.smart-reply-popup__regenerate svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Animations */
+.smart-reply-popup--entering {
+  animation: popupEnter 0.2s ease-out;
+}
+
+.smart-reply-popup--exiting {
+  animation: popupExit 0.15s ease-in forwards;
+}
+
+@keyframes popupEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes popupExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+/* Copy success animation */
+.smart-reply-popup__suggestion-btn--copied {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* Dragging state */
+.smart-reply-popup--dragging {
+  opacity: 0.9;
+  cursor: move;
+}
+
+/* Make sure the popup is above everything */
+.smart-reply-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2147483646;
+  background: transparent;
+}
