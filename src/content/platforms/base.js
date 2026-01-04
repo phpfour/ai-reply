@@ -101,8 +101,10 @@ export class BasePlatform {
     button.type = 'button';
     button.title = 'Generate smart reply';
     button.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+        <path d="M5 2L5.94 4.06L8 5L5.94 5.94L5 8L4.06 5.94L2 5L4.06 4.06L5 2Z" opacity="0.7"/>
+        <path d="M19 16L19.94 18.06L22 19L19.94 19.94L19 22L18.06 19.94L16 19L18.06 18.06L19 16Z" opacity="0.7"/>
       </svg>
     `;
 
