@@ -41,6 +41,7 @@ body {
 
 .popup__logo svg {
   color: #fbbf24;
+  fill: #fbbf24;
 }
 
 .popup__version {
