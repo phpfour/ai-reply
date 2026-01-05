@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "package": "npm run build && cd dist && zip -r ../smart-reply-extension.zip . && cd .. && echo 'Package created: smart-reply-extension.zip'"
   },
   "devDependencies": {
     "webpack": "^5.89.0",
