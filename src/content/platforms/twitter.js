@@ -169,47 +169,112 @@ export class TwitterPlatform extends BasePlatform {
       originalComment: null,
     };
 
-    // Find the tweet we're replying to
-    const dialog = editor.closest('[role="dialog"]') || document;
+    try {
+      // Method 1: Check if we're in a reply dialog
+      const dialog = editor.closest('[role="dialog"]');
 
-    // Check if this is a reply
-    const replyTarget = dialog.querySelector(
-      '[data-testid="tweet"]:first-of-type, ' +
-      'article[data-testid="tweet"]'
-    );
-
-    if (replyTarget) {
-      // Get tweet text
-      const tweetText = replyTarget.querySelector(
-        '[data-testid="tweetText"], ' +
-        '[lang] span'
-      );
-      if (tweetText) {
-        context.tweetContent = getTextContent(tweetText).substring(0, 500);
-        context.originalComment = context.tweetContent;
+      if (dialog) {
+        // In a reply modal - find the tweet being replied to
+        const tweets = dialog.querySelectorAll('article[data-testid="tweet"]');
+        // The first tweet in the dialog is what we're replying to
+        if (tweets.length > 0) {
+          const targetTweet = tweets[0];
+          context.tweetContent = this.extractTweetText(targetTweet);
+          context.tweetAuthor = this.extractTweetAuthor(targetTweet);
+          context.originalComment = context.tweetContent;
+        }
       }
 
-      // Get tweet author
-      const authorElement = replyTarget.querySelector(
-        '[data-testid="User-Name"] a, ' +
-        'a[role="link"][href^="/"]'
-      );
-      if (authorElement) {
-        context.tweetAuthor = getTextContent(authorElement);
+      // Method 2: Check if we're on a tweet detail page (replying inline)
+      if (!context.tweetContent) {
+        // Look for the main tweet on the page (usually has tabindex)
+        const mainTweet = document.querySelector('article[data-testid="tweet"][tabindex="-1"]') ||
+                          document.querySelector('[data-testid="tweet-text-show-more-link"]')?.closest('article') ||
+                          document.querySelector('article[data-testid="tweet"]');
+
+        if (mainTweet) {
+          context.tweetContent = this.extractTweetText(mainTweet);
+          context.tweetAuthor = this.extractTweetAuthor(mainTweet);
+          context.originalComment = context.tweetContent;
+        }
       }
-    } else {
-      // Not a reply - might be quoting or composing new tweet
-      // Try to get context from the timeline
-      const visibleTweet = document.querySelector('article[data-testid="tweet"]');
-      if (visibleTweet) {
-        const tweetText = visibleTweet.querySelector('[data-testid="tweetText"]');
-        if (tweetText) {
-          context.tweetContent = getTextContent(tweetText).substring(0, 500);
+
+      // Method 3: Find tweet from URL if on a tweet page
+      if (!context.tweetContent) {
+        const url = window.location.href;
+        if (url.includes('/status/')) {
+          // We're on a tweet detail page
+          const tweetArticle = document.querySelector('article[data-testid="tweet"]');
+          if (tweetArticle) {
+            context.tweetContent = this.extractTweetText(tweetArticle);
+            context.tweetAuthor = this.extractTweetAuthor(tweetArticle);
+            context.originalComment = context.tweetContent;
+          }
+        }
+      }
+
+      console.log('Smart Reply: Extracted Twitter context:', context);
+    } catch (error) {
+      console.error('Smart Reply: Error extracting Twitter context:', error);
+    }
+
+    return context;
+  }
+
+  /**
+   * Extract tweet text from a tweet article
+   * @param {Element} tweet - Tweet article element
+   * @returns {string|null}
+   */
+  extractTweetText(tweet) {
+    if (!tweet) return null;
+
+    // Try multiple selectors for tweet text
+    const selectors = [
+      '[data-testid="tweetText"]',
+      '[lang] > span',
+      'div[dir="auto"][lang]',
+    ];
+
+    for (const selector of selectors) {
+      const element = tweet.querySelector(selector);
+      if (element) {
+        const text = getTextContent(element);
+        if (text && text.length > 0) {
+          return text.substring(0, 500);
         }
       }
     }
 
-    return context;
+    return null;
+  }
+
+  /**
+   * Extract tweet author from a tweet article
+   * @param {Element} tweet - Tweet article element
+   * @returns {string|null}
+   */
+  extractTweetAuthor(tweet) {
+    if (!tweet) return null;
+
+    // Try multiple selectors for author
+    const selectors = [
+      '[data-testid="User-Name"] span:first-child',
+      '[data-testid="User-Name"] a span',
+      'a[role="link"][href^="/"] span',
+    ];
+
+    for (const selector of selectors) {
+      const element = tweet.querySelector(selector);
+      if (element) {
+        const text = getTextContent(element);
+        if (text && text.length > 0 && !text.startsWith('@')) {
+          return text;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
