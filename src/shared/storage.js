@@ -151,6 +151,48 @@ class StorageManager {
   }
 
   /**
+   * Get debug logs from chrome.storage.local
+   * @returns {Promise<Array>} Debug logs array
+   */
+  async getDebugLogs() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get([STORAGE_KEYS.DEBUG_LOGS], (result) => {
+        resolve(result[STORAGE_KEYS.DEBUG_LOGS] || []);
+      });
+    });
+  }
+
+  /**
+   * Save a debug log entry
+   * @param {Object} logEntry - Debug log entry
+   * @returns {Promise<void>}
+   */
+  async saveDebugLog(logEntry) {
+    const logs = await this.getDebugLogs();
+    // Keep only the last 10 logs
+    logs.unshift({
+      ...logEntry,
+      timestamp: new Date().toISOString(),
+    });
+    if (logs.length > 10) {
+      logs.pop();
+    }
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [STORAGE_KEYS.DEBUG_LOGS]: logs }, resolve);
+    });
+  }
+
+  /**
+   * Clear all debug logs
+   * @returns {Promise<void>}
+   */
+  async clearDebugLogs() {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [STORAGE_KEYS.DEBUG_LOGS]: [] }, resolve);
+    });
+  }
+
+  /**
    * Reset all data (settings and stats)
    * @returns {Promise<void>}
    */

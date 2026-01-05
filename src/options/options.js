@@ -24,6 +24,7 @@ class OptionsManager {
     await this.loadSettings();
     this.populateForm();
     this.attachEventListeners();
+    await this.loadDebugLogs();
   }
 
   /**
@@ -115,6 +116,16 @@ class OptionsManager {
     // Reset settings
     document.getElementById('reset-settings').addEventListener('click', () => {
       this.resetSettings();
+    });
+
+    // Debug log refresh
+    document.getElementById('refresh-logs').addEventListener('click', () => {
+      this.loadDebugLogs();
+    });
+
+    // Debug log clear
+    document.getElementById('clear-logs').addEventListener('click', () => {
+      this.clearDebugLogs();
     });
   }
 
@@ -223,6 +234,106 @@ class OptionsManager {
       console.error('Failed to reset settings:', error);
       this.showToast('Failed to reset settings', 'error');
     }
+  }
+
+  /**
+   * Load and display debug logs
+   */
+  async loadDebugLogs() {
+    try {
+      const result = await chrome.storage.local.get([STORAGE_KEYS.DEBUG_LOGS]);
+      const logs = result[STORAGE_KEYS.DEBUG_LOGS] || [];
+      this.renderDebugLogs(logs);
+    } catch (error) {
+      console.error('Failed to load debug logs:', error);
+    }
+  }
+
+  /**
+   * Clear all debug logs
+   */
+  async clearDebugLogs() {
+    try {
+      await chrome.storage.local.set({ [STORAGE_KEYS.DEBUG_LOGS]: [] });
+      this.renderDebugLogs([]);
+      this.showToast('Debug logs cleared', 'success');
+    } catch (error) {
+      console.error('Failed to clear debug logs:', error);
+      this.showToast('Failed to clear logs', 'error');
+    }
+  }
+
+  /**
+   * Render debug logs to the UI
+   * @param {Array} logs - Array of debug log entries
+   */
+  renderDebugLogs(logs) {
+    const container = document.getElementById('debug-log');
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `
+        <div class="options__debug-empty">
+          <p>No debug logs yet. Generate a reply to see the prompts and responses.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const html = logs.map(log => {
+      const time = new Date(log.timestamp).toLocaleString();
+      const statusClass = log.success ? 'options__debug-success' : 'options__debug-error';
+      const statusText = log.success ? 'Success' : 'Error';
+
+      return `
+        <div class="options__debug-entry">
+          <div class="options__debug-header">
+            <span class="options__debug-platform">${this.escapeHtml(log.platform || 'Unknown')}</span>
+            <span class="options__debug-time">${time}</span>
+          </div>
+
+          <div class="options__debug-section">
+            <div class="options__debug-section-title">Model</div>
+            <div class="options__debug-content options__debug-model">${this.escapeHtml(log.model || 'N/A')}</div>
+          </div>
+
+          <div class="options__debug-section">
+            <div class="options__debug-section-title">System Prompt</div>
+            <div class="options__debug-content">${this.escapeHtml(log.systemPrompt || 'N/A')}</div>
+          </div>
+
+          <div class="options__debug-section">
+            <div class="options__debug-section-title">User Prompt</div>
+            <div class="options__debug-content">${this.escapeHtml(log.userPrompt || 'N/A')}</div>
+          </div>
+
+          <div class="options__debug-section">
+            <div class="options__debug-section-title">Response <span class="${statusClass}">(${statusText})</span></div>
+            <div class="options__debug-content">${this.escapeHtml(log.error || log.response || 'N/A')}</div>
+          </div>
+
+          ${log.suggestions ? `
+          <div class="options__debug-section">
+            <div class="options__debug-section-title">Parsed Suggestions</div>
+            <div class="options__debug-content">${log.suggestions.map((s, i) => `${i + 1}. ${this.escapeHtml(s)}`).join('\n')}</div>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   * @param {string} text - Text to escape
+   * @returns {string} Escaped text
+   */
+  escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**

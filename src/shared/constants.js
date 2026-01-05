@@ -34,6 +34,7 @@ export const STORAGE_KEYS = {
   STATS: 'smartReplyStats',
   API_KEY: 'smartReplyApiKey',
   USER_PROFILE: 'smartReplyUserProfile',
+  DEBUG_LOGS: 'smartReplyDebugLogs',
 };
 
 // Available AI models
