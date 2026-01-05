@@ -101,6 +101,8 @@ export const DEFAULT_SETTINGS = {
   },
   typingSimulation: true,
   typingSpeed: 50, // ms per character
+  maxContextLength: 2000, // Max characters for post content
+  maxCompletionTokens: 4000, // Max tokens for AI response
 };
 
 // Default user profile

@@ -71,6 +71,16 @@ class OptionsManager {
     typingSpeed.value = this.settings.typingSpeed;
     this.updateTypingSpeedLabel();
 
+    // Max context length
+    const maxContextLength = document.getElementById('max-context-length');
+    maxContextLength.value = this.settings.maxContextLength || 2000;
+    this.updateMaxContextLengthLabel();
+
+    // Max completion tokens
+    const maxCompletionTokens = document.getElementById('max-completion-tokens');
+    maxCompletionTokens.value = this.settings.maxCompletionTokens || 4000;
+    this.updateMaxCompletionTokensLabel();
+
     // Platforms
     document.getElementById('platform-youtube').checked =
       this.settings.enabledPlatforms[PLATFORMS.YOUTUBE];
@@ -106,6 +116,16 @@ class OptionsManager {
     // Typing speed slider
     document.getElementById('typing-speed').addEventListener('input', () => {
       this.updateTypingSpeedLabel();
+    });
+
+    // Max context length slider
+    document.getElementById('max-context-length').addEventListener('input', () => {
+      this.updateMaxContextLengthLabel();
+    });
+
+    // Max completion tokens slider
+    document.getElementById('max-completion-tokens').addEventListener('input', () => {
+      this.updateMaxCompletionTokensLabel();
     });
 
     // Save settings
@@ -167,6 +187,22 @@ class OptionsManager {
   }
 
   /**
+   * Update max context length label
+   */
+  updateMaxContextLengthLabel() {
+    const value = document.getElementById('max-context-length').value;
+    document.getElementById('max-context-length-value').textContent = value;
+  }
+
+  /**
+   * Update max completion tokens label
+   */
+  updateMaxCompletionTokensLabel() {
+    const value = document.getElementById('max-completion-tokens').value;
+    document.getElementById('max-completion-tokens-value').textContent = value;
+  }
+
+  /**
    * Save settings to storage
    */
   async saveSettings() {
@@ -177,6 +213,8 @@ class OptionsManager {
         defaultTone: document.getElementById('default-tone').value,
         typingSimulation: document.getElementById('typing-simulation').checked,
         typingSpeed: parseInt(document.getElementById('typing-speed').value, 10),
+        maxContextLength: parseInt(document.getElementById('max-context-length').value, 10),
+        maxCompletionTokens: parseInt(document.getElementById('max-completion-tokens').value, 10),
         enabledPlatforms: {
           [PLATFORMS.YOUTUBE]: document.getElementById('platform-youtube').checked,
           [PLATFORMS.INSTAGRAM]: document.getElementById('platform-instagram').checked,
