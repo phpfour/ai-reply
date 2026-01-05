@@ -13,25 +13,67 @@ class ApiService {
   /**
    * Build the system prompt for reply generation
    * @param {string} tone - Selected tone
+   * @param {Object} userProfile - User profile for personalization
    * @returns {string} System prompt
    */
-  buildSystemPrompt(tone) {
+  buildSystemPrompt(tone, userProfile = {}) {
     const toneDescription = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS[TONES.AUTO];
 
-    return `You are a helpful assistant that generates social media reply suggestions.
-Your task is to create natural, authentic replies that sound human-written.
+    let personalizationSection = '';
 
-Tone style: ${toneDescription}
+    // Build personalization context if user has provided info
+    if (userProfile.nickname || userProfile.occupation || userProfile.bio) {
+      personalizationSection = '\n\nABOUT THE PERSON WRITING REPLIES:';
+      if (userProfile.nickname) {
+        personalizationSection += `\n- Name: ${userProfile.nickname}`;
+      }
+      if (userProfile.occupation) {
+        personalizationSection += `\n- Role: ${userProfile.occupation}`;
+      }
+      if (userProfile.bio) {
+        personalizationSection += `\n- Background: ${userProfile.bio}`;
+      }
+      personalizationSection += '\n\nUse this context to make replies more authentic and relevant to their expertise when appropriate.';
+    }
 
-Guidelines:
-- Keep replies concise (1-3 sentences typically)
-- Match the language of the original content
-- Be respectful and constructive
-- Avoid generic phrases like "Great post!" or "Thanks for sharing!"
-- Make each suggestion distinct in approach
-- Consider the context (video title, post caption, etc.)
-- Never use hashtags unless the original content uses them
-- Sound natural, not like a bot`;
+    // Build reply style guidance
+    let styleGuidance = '';
+    if (userProfile.replyStyle) {
+      const styleDescriptions = {
+        'professional': 'Keep a formal, business-appropriate tone.',
+        'casual': 'Use relaxed, conversational language.',
+        'witty': 'Include clever observations and subtle humor.',
+        'thoughtful': 'Provide deeper, more reflective responses.',
+        'concise': 'Keep replies extremely brief and to the point.',
+      };
+      styleGuidance = styleDescriptions[userProfile.replyStyle] || '';
+      if (styleGuidance) {
+        styleGuidance = `\n\nStyle preference: ${styleGuidance}`;
+      }
+    }
+
+    // Build custom instructions section
+    let customInstructionsSection = '';
+    if (userProfile.customInstructions) {
+      customInstructionsSection = `\n\nCUSTOM INSTRUCTIONS FROM USER:\n${userProfile.customInstructions}`;
+    }
+
+    return `You are an expert at writing engaging, authentic social media replies that feel personal and human.
+
+CRITICAL REQUIREMENTS:
+1. Every reply MUST directly reference SPECIFIC details from the post (names, topics, numbers, opinions, questions)
+2. BANNED phrases: "Great post", "Thanks for sharing", "Well said", "Interesting perspective", "I agree", "Love this"
+3. Each reply must prove you actually READ the content by mentioning something specific from it
+4. Add genuine value: share a related experience, ask a thoughtful follow-up, or offer a unique angle
+
+Tone: ${toneDescription}${styleGuidance}${personalizationSection}${customInstructionsSection}
+
+Format rules:
+- 1-2 sentences maximum
+- Sound like a real person having a conversation
+- Match the energy/formality of the original post
+- No hashtags or emojis unless the original uses them
+- Each suggestion must take a COMPLETELY different approach`;
   }
 
   /**
@@ -40,31 +82,53 @@ Guidelines:
    * @returns {string} User prompt
    */
   buildUserPrompt(context) {
-    let prompt = `Generate ${API_CONFIG.SUGGESTIONS_COUNT} distinct reply suggestions for the following:\n\n`;
+    // Gather all available content
+    const content = context.originalComment || context.tweetContent ||
+                    context.postContent || context.postCaption || '';
+    const author = context.postAuthor || context.tweetAuthor || '';
+    const title = context.postTitle || '';
+    const description = context.postDescription || '';
 
-    if (context.platform) {
-      prompt += `Platform: ${context.platform}\n`;
+    // If no content captured, return a helpful message
+    if (!content && !title && !description) {
+      return `Platform: ${context.platform || 'social media'}
+
+[No post content was captured - the extension couldn't read this post]
+
+Generate 3 placeholder replies that the user should customize. Make them templates like:
+1. [Something specific about TOPIC] really resonates because...
+2. Your point about [SPECIFIC DETAIL] made me think...
+3. This reminds me of [RELATED EXPERIENCE]...`;
     }
 
-    if (context.postTitle) {
-      prompt += `Title: ${context.postTitle}\n`;
+    let prompt = `PLATFORM: ${context.platform || 'social media'}\n\n`;
+
+    // Primary content to reply to
+    if (content) {
+      prompt += `>>> POST/COMMENT TO REPLY TO:\n"${content.substring(0, 600)}"\n\n`;
     }
 
-    if (context.postDescription) {
-      prompt += `Description: ${context.postDescription.substring(0, 500)}\n`;
+    // Additional context
+    if (author) {
+      prompt += `Author: ${author}\n`;
+    }
+    if (title && title !== content) {
+      prompt += `Title: ${title}\n`;
+    }
+    if (description && description !== content) {
+      prompt += `Context: ${description.substring(0, 200)}\n`;
     }
 
-    if (context.postAuthor) {
-      prompt += `Author: ${context.postAuthor}\n`;
-    }
+    prompt += `
+TASK: Write 3 replies that each:
+- Quote or reference a SPECIFIC word/phrase/idea from the post above
+- Take a different angle (1: build on their point, 2: ask smart follow-up, 3: share related insight)
+- Sound like a thoughtful human, not a bot
 
-    if (context.originalComment) {
-      prompt += `\nComment to reply to: "${context.originalComment}"\n`;
-    } else if (context.postCaption) {
-      prompt += `\nPost caption: "${context.postCaption.substring(0, 500)}"\n`;
-    }
-
-    prompt += `\nProvide exactly ${API_CONFIG.SUGGESTIONS_COUNT} reply suggestions, each on a new line, prefixed with a number (1., 2., 3.). Keep them natural and varied in approach.`;
+Reply format:
+1. [Reply that references specific content]
+2. [Different angle, still specific]
+3. [Third unique approach]`;
 
     return prompt;
   }
@@ -121,21 +185,58 @@ Guidelines:
         };
       }
 
+      // Get settings and user profile
+      const settings = await storage.getSettings();
+      const userProfile = await storage.getUserProfile();
+      const selectedModel = settings.selectedModel || this.model;
+
+      const systemPrompt = this.buildSystemPrompt(tone, userProfile);
+      const userPrompt = this.buildUserPrompt(context);
+
+      // Debug logging
+      console.log('Smart Reply: Sending to API with context:', {
+        platform: context.platform,
+        hasContent: !!(context.originalComment || context.tweetContent || context.postContent),
+        contentPreview: (context.originalComment || context.tweetContent || context.postContent || '').substring(0, 100),
+        tone,
+        model: selectedModel,
+        hasUserProfile: !!(userProfile.nickname || userProfile.occupation || userProfile.bio),
+      });
+      console.log('Smart Reply: User prompt:', userPrompt);
+
+      // Build request body - o1 models don't support system messages or temperature
+      const isO1Model = selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+      let requestBody;
+
+      if (isO1Model) {
+        // o1 models: combine system and user prompts, no temperature
+        requestBody = {
+          model: selectedModel,
+          messages: [
+            { role: 'user', content: `${systemPrompt}\n\n---\n\n${userPrompt}` },
+          ],
+          max_completion_tokens: API_CONFIG.MAX_TOKENS,
+        };
+      } else {
+        // Standard models: use system message and temperature
+        requestBody = {
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: API_CONFIG.MAX_TOKENS,
+          temperature: 0.9,
+        };
+      }
+
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: 'system', content: this.buildSystemPrompt(tone) },
-            { role: 'user', content: this.buildUserPrompt(context) },
-          ],
-          max_tokens: API_CONFIG.MAX_TOKENS,
-          temperature: 0.8,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
