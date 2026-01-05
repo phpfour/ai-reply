@@ -219,7 +219,7 @@ Reply format:
           max_completion_tokens: API_CONFIG.MAX_TOKENS,
         };
       } else if (isGpt5Model) {
-        // GPT-5 models: use max_completion_tokens instead of max_tokens
+        // GPT-5 models: use max_completion_tokens, no custom temperature supported
         requestBody = {
           model: selectedModel,
           messages: [
@@ -227,7 +227,6 @@ Reply format:
             { role: 'user', content: userPrompt },
           ],
           max_completion_tokens: API_CONFIG.MAX_TOKENS,
-          temperature: 0.9,
         };
       } else {
         // Legacy models (GPT-4, GPT-3.5): use max_tokens
