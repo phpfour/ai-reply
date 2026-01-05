@@ -241,17 +241,51 @@ Reply format:
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
+        const errorMessage = errorData.error?.message || `API error: ${response.status}`;
+
+        // Save debug log for error
+        await storage.saveDebugLog({
+          platform: context.platform,
+          model: selectedModel,
+          systemPrompt,
+          userPrompt,
+          error: errorMessage,
+          success: false,
+        });
+
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content;
 
       if (!content) {
+        // Save debug log for empty response
+        await storage.saveDebugLog({
+          platform: context.platform,
+          model: selectedModel,
+          systemPrompt,
+          userPrompt,
+          response: 'Empty response from API',
+          error: 'Empty response from API',
+          success: false,
+        });
+
         throw new Error('Empty response from API');
       }
 
       const suggestions = this.parseResponse(content);
+
+      // Save debug log for successful response
+      await storage.saveDebugLog({
+        platform: context.platform,
+        model: selectedModel,
+        systemPrompt,
+        userPrompt,
+        response: content,
+        suggestions,
+        success: true,
+      });
 
       if (suggestions.length === 0) {
         throw new Error('Failed to parse suggestions from response');
@@ -263,6 +297,19 @@ Reply format:
       };
     } catch (error) {
       console.error('Smart Reply API error:', error);
+
+      // Save debug log for catch block errors (if not already saved)
+      if (!error.message.includes('API error:') && !error.message.includes('Empty response')) {
+        await storage.saveDebugLog({
+          platform: context.platform,
+          model: settings?.selectedModel || this.model,
+          systemPrompt: systemPrompt || 'N/A',
+          userPrompt: userPrompt || 'N/A',
+          error: error.message,
+          success: false,
+        });
+      }
+
       return {
         success: false,
         error: error.message,

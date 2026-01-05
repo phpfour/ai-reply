@@ -395,6 +395,122 @@ body {
   background: #ef4444;
 }
 
+/* Debug Log */
+.options__debug-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.options__btn--small {
+  padding: 6px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.options__btn--danger {
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.options__btn--danger:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.options__debug-log {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.options__debug-empty {
+  color: #6b7280;
+  text-align: center;
+  padding: 24px;
+  font-family: inherit;
+}
+
+.options__debug-empty p {
+  margin: 0;
+}
+
+.options__debug-entry {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.options__debug-entry:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.options__debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.options__debug-platform {
+  color: #60a5fa;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.options__debug-time {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.options__debug-section {
+  margin-bottom: 12px;
+}
+
+.options__debug-section-title {
+  color: #f59e0b;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.options__debug-content {
+  color: #e5e7eb;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #2d2d2d;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.options__debug-model {
+  color: #a78bfa;
+}
+
+.options__debug-error {
+  color: #ef4444;
+}
+
+.options__debug-success {
+  color: #10b981;
+}
+
 /* Footer */
 .options__footer {
   padding: 16px 24px;
