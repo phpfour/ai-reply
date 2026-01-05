@@ -13,10 +13,50 @@ class ApiService {
   /**
    * Build the system prompt for reply generation
    * @param {string} tone - Selected tone
+   * @param {Object} userProfile - User profile for personalization
    * @returns {string} System prompt
    */
-  buildSystemPrompt(tone) {
+  buildSystemPrompt(tone, userProfile = {}) {
     const toneDescription = TONE_DESCRIPTIONS[tone] || TONE_DESCRIPTIONS[TONES.AUTO];
+
+    let personalizationSection = '';
+
+    // Build personalization context if user has provided info
+    if (userProfile.nickname || userProfile.occupation || userProfile.bio) {
+      personalizationSection = '\n\nABOUT THE PERSON WRITING REPLIES:';
+      if (userProfile.nickname) {
+        personalizationSection += `\n- Name: ${userProfile.nickname}`;
+      }
+      if (userProfile.occupation) {
+        personalizationSection += `\n- Role: ${userProfile.occupation}`;
+      }
+      if (userProfile.bio) {
+        personalizationSection += `\n- Background: ${userProfile.bio}`;
+      }
+      personalizationSection += '\n\nUse this context to make replies more authentic and relevant to their expertise when appropriate.';
+    }
+
+    // Build reply style guidance
+    let styleGuidance = '';
+    if (userProfile.replyStyle) {
+      const styleDescriptions = {
+        'professional': 'Keep a formal, business-appropriate tone.',
+        'casual': 'Use relaxed, conversational language.',
+        'witty': 'Include clever observations and subtle humor.',
+        'thoughtful': 'Provide deeper, more reflective responses.',
+        'concise': 'Keep replies extremely brief and to the point.',
+      };
+      styleGuidance = styleDescriptions[userProfile.replyStyle] || '';
+      if (styleGuidance) {
+        styleGuidance = `\n\nStyle preference: ${styleGuidance}`;
+      }
+    }
+
+    // Build custom instructions section
+    let customInstructionsSection = '';
+    if (userProfile.customInstructions) {
+      customInstructionsSection = `\n\nCUSTOM INSTRUCTIONS FROM USER:\n${userProfile.customInstructions}`;
+    }
 
     return `You are an expert at writing engaging, authentic social media replies that feel personal and human.
 
@@ -26,7 +66,7 @@ CRITICAL REQUIREMENTS:
 3. Each reply must prove you actually READ the content by mentioning something specific from it
 4. Add genuine value: share a related experience, ask a thoughtful follow-up, or offer a unique angle
 
-Tone: ${toneDescription}
+Tone: ${toneDescription}${styleGuidance}${personalizationSection}${customInstructionsSection}
 
 Format rules:
 - 1-2 sentences maximum
@@ -145,7 +185,12 @@ Reply format:
         };
       }
 
-      const systemPrompt = this.buildSystemPrompt(tone);
+      // Get settings and user profile
+      const settings = await storage.getSettings();
+      const userProfile = await storage.getUserProfile();
+      const selectedModel = settings.selectedModel || this.model;
+
+      const systemPrompt = this.buildSystemPrompt(tone, userProfile);
       const userPrompt = this.buildUserPrompt(context);
 
       // Debug logging
@@ -154,8 +199,36 @@ Reply format:
         hasContent: !!(context.originalComment || context.tweetContent || context.postContent),
         contentPreview: (context.originalComment || context.tweetContent || context.postContent || '').substring(0, 100),
         tone,
+        model: selectedModel,
+        hasUserProfile: !!(userProfile.nickname || userProfile.occupation || userProfile.bio),
       });
       console.log('Smart Reply: User prompt:', userPrompt);
+
+      // Build request body - o1 models don't support system messages or temperature
+      const isO1Model = selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+      let requestBody;
+
+      if (isO1Model) {
+        // o1 models: combine system and user prompts, no temperature
+        requestBody = {
+          model: selectedModel,
+          messages: [
+            { role: 'user', content: `${systemPrompt}\n\n---\n\n${userPrompt}` },
+          ],
+          max_completion_tokens: API_CONFIG.MAX_TOKENS,
+        };
+      } else {
+        // Standard models: use system message and temperature
+        requestBody = {
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: API_CONFIG.MAX_TOKENS,
+          temperature: 0.9,
+        };
+      }
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -163,15 +236,7 @@ Reply format:
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          max_tokens: API_CONFIG.MAX_TOKENS,
-          temperature: 0.9,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

@@ -3,6 +3,7 @@ import {
   TONES,
   STORAGE_KEYS,
   DEFAULT_SETTINGS,
+  DEFAULT_USER_PROFILE,
   MESSAGES,
 } from '../shared/constants.js';
 
@@ -12,6 +13,7 @@ import {
 class OptionsManager {
   constructor() {
     this.settings = { ...DEFAULT_SETTINGS };
+    this.userProfile = { ...DEFAULT_USER_PROFILE };
     this.apiKey = '';
   }
 
@@ -36,6 +38,10 @@ class OptionsManager {
       // Get API key
       const apiKeyResult = await chrome.storage.sync.get([STORAGE_KEYS.API_KEY]);
       this.apiKey = apiKeyResult[STORAGE_KEYS.API_KEY] || '';
+
+      // Get user profile
+      const profileResult = await chrome.storage.sync.get([STORAGE_KEYS.USER_PROFILE]);
+      this.userProfile = profileResult[STORAGE_KEYS.USER_PROFILE] || { ...DEFAULT_USER_PROFILE };
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -47,6 +53,9 @@ class OptionsManager {
   populateForm() {
     // API Key
     document.getElementById('api-key').value = this.apiKey;
+
+    // AI Model
+    document.getElementById('ai-model').value = this.settings.selectedModel || 'gpt-4o-mini';
 
     // Default tone
     document.getElementById('default-tone').value = this.settings.defaultTone;
@@ -70,6 +79,13 @@ class OptionsManager {
       this.settings.enabledPlatforms[PLATFORMS.LINKEDIN];
     document.getElementById('platform-twitter').checked =
       this.settings.enabledPlatforms[PLATFORMS.TWITTER];
+
+    // User profile
+    document.getElementById('user-nickname').value = this.userProfile.nickname || '';
+    document.getElementById('user-occupation').value = this.userProfile.occupation || '';
+    document.getElementById('user-bio').value = this.userProfile.bio || '';
+    document.getElementById('reply-style').value = this.userProfile.replyStyle || '';
+    document.getElementById('custom-instructions').value = this.userProfile.customInstructions || '';
   }
 
   /**
@@ -146,6 +162,7 @@ class OptionsManager {
     try {
       // Gather settings from form
       const settings = {
+        selectedModel: document.getElementById('ai-model').value,
         defaultTone: document.getElementById('default-tone').value,
         typingSimulation: document.getElementById('typing-simulation').checked,
         typingSpeed: parseInt(document.getElementById('typing-speed').value, 10),
@@ -160,14 +177,25 @@ class OptionsManager {
       // Get API key
       const apiKey = document.getElementById('api-key').value.trim();
 
+      // Gather user profile
+      const userProfile = {
+        nickname: document.getElementById('user-nickname').value.trim(),
+        occupation: document.getElementById('user-occupation').value.trim(),
+        bio: document.getElementById('user-bio').value.trim(),
+        replyStyle: document.getElementById('reply-style').value,
+        customInstructions: document.getElementById('custom-instructions').value.trim(),
+      };
+
       // Save to storage
       await chrome.storage.sync.set({
         [STORAGE_KEYS.SETTINGS]: settings,
         [STORAGE_KEYS.API_KEY]: apiKey,
+        [STORAGE_KEYS.USER_PROFILE]: userProfile,
       });
 
       this.settings = settings;
       this.apiKey = apiKey;
+      this.userProfile = userProfile;
 
       this.showToast('Settings saved successfully!', 'success');
     } catch (error) {
@@ -182,9 +210,11 @@ class OptionsManager {
   async resetSettings() {
     try {
       this.settings = { ...DEFAULT_SETTINGS };
+      this.userProfile = { ...DEFAULT_USER_PROFILE };
 
       await chrome.storage.sync.set({
         [STORAGE_KEYS.SETTINGS]: this.settings,
+        [STORAGE_KEYS.USER_PROFILE]: this.userProfile,
       });
 
       this.populateForm();

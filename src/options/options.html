@@ -72,6 +72,20 @@
         </h2>
         <div class="options__card">
           <div class="options__field">
+            <label class="options__label" for="ai-model">AI Model</label>
+            <select id="ai-model" class="options__select">
+              <option value="gpt-4o-mini">GPT-4o Mini - Fast and cost-effective</option>
+              <option value="gpt-4o">GPT-4o - Most capable, best quality</option>
+              <option value="o1">o1 - Advanced reasoning model</option>
+              <option value="o1-mini">o1 Mini - Fast reasoning model</option>
+              <option value="o3-mini">o3 Mini - Latest fast reasoning model</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo - Powerful with large context</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fastest, most economical</option>
+            </select>
+            <p class="options__help">Choose the AI model based on your needs and budget</p>
+          </div>
+
+          <div class="options__field">
             <label class="options__label" for="default-tone">Default Tone</label>
             <select id="default-tone" class="options__select">
               <option value="auto">Auto - Matches context</option>
@@ -107,6 +121,73 @@
               <span>Fast</span>
               <span>Slow</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="options__section">
+        <h2 class="options__section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Personalization
+        </h2>
+        <div class="options__card">
+          <p class="options__card-description">Help the AI understand your style and background to generate more relevant replies.</p>
+
+          <div class="options__field">
+            <label class="options__label" for="user-nickname">Your Name / Nickname</label>
+            <input
+              type="text"
+              id="user-nickname"
+              class="options__input"
+              placeholder="e.g., Mohammad"
+            >
+          </div>
+
+          <div class="options__field">
+            <label class="options__label" for="user-occupation">Occupation / Role</label>
+            <input
+              type="text"
+              id="user-occupation"
+              class="options__input"
+              placeholder="e.g., Tech Entrepreneur, Software Architect"
+            >
+          </div>
+
+          <div class="options__field">
+            <label class="options__label" for="user-bio">About You</label>
+            <textarea
+              id="user-bio"
+              class="options__textarea"
+              rows="3"
+              placeholder="e.g., I'm a technical leader with 20+ years of experience in building enterprise applications..."
+            ></textarea>
+            <p class="options__help">Brief description of your background and expertise</p>
+          </div>
+
+          <div class="options__field">
+            <label class="options__label" for="reply-style">Preferred Reply Style</label>
+            <select id="reply-style" class="options__select">
+              <option value="">No preference</option>
+              <option value="professional">Professional - Formal and business-like</option>
+              <option value="casual">Casual - Relaxed and conversational</option>
+              <option value="witty">Witty - Clever with subtle humor</option>
+              <option value="thoughtful">Thoughtful - Deep and reflective</option>
+              <option value="concise">Concise - Brief and to the point</option>
+            </select>
+          </div>
+
+          <div class="options__field">
+            <label class="options__label" for="custom-instructions">Custom Instructions</label>
+            <textarea
+              id="custom-instructions"
+              class="options__textarea"
+              rows="4"
+              placeholder="e.g., Always mention my expertise when relevant. Avoid using emojis. Keep replies under 280 characters for Twitter..."
+            ></textarea>
+            <p class="options__help">Special instructions the AI should follow when generating your replies</p>
           </div>
         </div>
       </section>

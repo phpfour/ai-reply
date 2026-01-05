@@ -1,7 +1,8 @@
 import {
   STORAGE_KEYS,
   DEFAULT_SETTINGS,
-  DEFAULT_STATS
+  DEFAULT_STATS,
+  DEFAULT_USER_PROFILE
 } from './constants.js';
 
 /**
@@ -113,6 +114,29 @@ class StorageManager {
   async saveApiKey(apiKey) {
     return new Promise((resolve) => {
       chrome.storage.sync.set({ [STORAGE_KEYS.API_KEY]: apiKey }, resolve);
+    });
+  }
+
+  /**
+   * Get user profile from chrome.storage.sync
+   * @returns {Promise<Object>} User profile
+   */
+  async getUserProfile() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get([STORAGE_KEYS.USER_PROFILE], (result) => {
+        resolve(result[STORAGE_KEYS.USER_PROFILE] || { ...DEFAULT_USER_PROFILE });
+      });
+    });
+  }
+
+  /**
+   * Save user profile to chrome.storage.sync
+   * @param {Object} profile - User profile to save
+   * @returns {Promise<void>}
+   */
+  async saveUserProfile(profile) {
+    return new Promise((resolve) => {
+      chrome.storage.sync.set({ [STORAGE_KEYS.USER_PROFILE]: profile }, resolve);
     });
   }
 

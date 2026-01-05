@@ -33,11 +33,45 @@ export const STORAGE_KEYS = {
   SETTINGS: 'smartReplySettings',
   STATS: 'smartReplyStats',
   API_KEY: 'smartReplyApiKey',
+  USER_PROFILE: 'smartReplyUserProfile',
+};
+
+// Available AI models
+export const AI_MODELS = {
+  'gpt-4o-mini': {
+    name: 'GPT-4o Mini',
+    description: 'Fast and cost-effective',
+  },
+  'gpt-4o': {
+    name: 'GPT-4o',
+    description: 'Most capable, best quality',
+  },
+  'o1': {
+    name: 'o1',
+    description: 'Advanced reasoning model',
+  },
+  'o1-mini': {
+    name: 'o1 Mini',
+    description: 'Fast reasoning model',
+  },
+  'o3-mini': {
+    name: 'o3 Mini',
+    description: 'Latest fast reasoning model',
+  },
+  'gpt-4-turbo': {
+    name: 'GPT-4 Turbo',
+    description: 'Powerful with large context',
+  },
+  'gpt-3.5-turbo': {
+    name: 'GPT-3.5 Turbo',
+    description: 'Fastest, most economical',
+  },
 };
 
 // Default settings
 export const DEFAULT_SETTINGS = {
   defaultTone: TONES.AUTO,
+  selectedModel: 'gpt-4o-mini',
   enabledPlatforms: {
     [PLATFORMS.YOUTUBE]: true,
     [PLATFORMS.INSTAGRAM]: true,
@@ -46,6 +80,15 @@ export const DEFAULT_SETTINGS = {
   },
   typingSimulation: true,
   typingSpeed: 50, // ms per character
+};
+
+// Default user profile
+export const DEFAULT_USER_PROFILE = {
+  nickname: '',
+  occupation: '',
+  bio: '',
+  customInstructions: '',
+  replyStyle: '', // e.g., "casual", "professional", "witty"
 };
 
 // Default statistics
