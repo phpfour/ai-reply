@@ -308,7 +308,7 @@ class OptionsManager {
 
           <div class="options__debug-section">
             <div class="options__debug-section-title">Response <span class="${statusClass}">(${statusText})</span></div>
-            <div class="options__debug-content">${this.escapeHtml(log.error || log.response || 'N/A')}</div>
+            <div class="options__debug-content">${this.escapeHtml(log.response || log.error || 'N/A')}</div>
           </div>
 
           ${log.suggestions ? `
