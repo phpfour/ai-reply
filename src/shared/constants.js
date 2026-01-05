@@ -136,6 +136,7 @@ export const API_CONFIG = {
   DEFAULT_ENDPOINT: 'https://api.openai.com/v1/chat/completions',
   DEFAULT_MODEL: 'gpt-5-mini',
   MAX_TOKENS: 500,
+  MAX_TOKENS_REASONING: 4000, // Higher limit for reasoning models (GPT-5, o1, o3)
   SUGGESTIONS_COUNT: 3,
 };
 
