@@ -210,23 +210,23 @@ Reply format:
       let requestBody;
 
       if (isReasoningModel) {
-        // o1/o3 models: combine system and user prompts, no temperature
+        // o1/o3 models: combine system and user prompts, no temperature, higher token limit for reasoning
         requestBody = {
           model: selectedModel,
           messages: [
             { role: 'user', content: `${systemPrompt}\n\n---\n\n${userPrompt}` },
           ],
-          max_completion_tokens: API_CONFIG.MAX_TOKENS,
+          max_completion_tokens: API_CONFIG.MAX_TOKENS_REASONING,
         };
       } else if (isGpt5Model) {
-        // GPT-5 models: use max_completion_tokens, no custom temperature supported
+        // GPT-5 models: use max_completion_tokens, no custom temperature, higher token limit for reasoning
         requestBody = {
           model: selectedModel,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          max_completion_tokens: API_CONFIG.MAX_TOKENS,
+          max_completion_tokens: API_CONFIG.MAX_TOKENS_REASONING,
         };
       } else {
         // Legacy models (GPT-4, GPT-3.5): use max_tokens
