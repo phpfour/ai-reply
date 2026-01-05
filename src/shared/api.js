@@ -270,14 +270,18 @@ Reply format:
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content;
 
+      // Log raw response for debugging
+      console.log('Smart Reply: Raw API response:', JSON.stringify(data, null, 2));
+
       if (!content) {
-        // Save debug log for empty response
+        // Save debug log for empty response with raw data
+        const rawResponse = JSON.stringify(data, null, 2);
         await storage.saveDebugLog({
           platform: context.platform,
           model: selectedModel,
           systemPrompt,
           userPrompt,
-          response: 'Empty response from API',
+          response: `Empty content. Raw response:\n${rawResponse}`,
           error: 'Empty response from API',
           success: false,
         });
