@@ -55,7 +55,7 @@ class OptionsManager {
     document.getElementById('api-key').value = this.apiKey;
 
     // AI Model
-    document.getElementById('ai-model').value = this.settings.selectedModel || 'gpt-4o-mini';
+    document.getElementById('ai-model').value = this.settings.selectedModel || 'gpt-5-mini';
 
     // Default tone
     document.getElementById('default-tone').value = this.settings.defaultTone;

@@ -38,13 +38,33 @@ export const STORAGE_KEYS = {
 
 // Available AI models
 export const AI_MODELS = {
+  'gpt-5.2-pro': {
+    name: 'GPT-5.2 Pro',
+    description: 'Most powerful, highest quality',
+  },
+  'gpt-5.2': {
+    name: 'GPT-5.2',
+    description: 'Latest flagship model',
+  },
+  'gpt-5': {
+    name: 'GPT-5',
+    description: 'Advanced capabilities',
+  },
+  'gpt-5-mini': {
+    name: 'GPT-5 Mini',
+    description: 'Fast and capable (recommended)',
+  },
+  'gpt-5-nano': {
+    name: 'GPT-5 Nano',
+    description: 'Ultra-fast, most economical',
+  },
   'gpt-4o-mini': {
     name: 'GPT-4o Mini',
     description: 'Fast and cost-effective',
   },
   'gpt-4o': {
     name: 'GPT-4o',
-    description: 'Most capable, best quality',
+    description: 'Capable multimodal model',
   },
   'o1': {
     name: 'o1',
@@ -64,14 +84,14 @@ export const AI_MODELS = {
   },
   'gpt-3.5-turbo': {
     name: 'GPT-3.5 Turbo',
-    description: 'Fastest, most economical',
+    description: 'Legacy model',
   },
 };
 
 // Default settings
 export const DEFAULT_SETTINGS = {
   defaultTone: TONES.AUTO,
-  selectedModel: 'gpt-4o-mini',
+  selectedModel: 'gpt-5-mini',
   enabledPlatforms: {
     [PLATFORMS.YOUTUBE]: true,
     [PLATFORMS.INSTAGRAM]: true,
@@ -113,7 +133,7 @@ export const DEFAULT_STATS = {
 // API configuration
 export const API_CONFIG = {
   DEFAULT_ENDPOINT: 'https://api.openai.com/v1/chat/completions',
-  DEFAULT_MODEL: 'gpt-4o-mini',
+  DEFAULT_MODEL: 'gpt-5-mini',
   MAX_TOKENS: 500,
   SUGGESTIONS_COUNT: 3,
 };
