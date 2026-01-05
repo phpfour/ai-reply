@@ -79,9 +79,10 @@ Format rules:
   /**
    * Build the user prompt with context
    * @param {Object} context - Context object
+   * @param {number} maxContextLength - Max characters for content
    * @returns {string} User prompt
    */
-  buildUserPrompt(context) {
+  buildUserPrompt(context, maxContextLength = 2000) {
     // Gather all available content
     const content = context.originalComment || context.tweetContent ||
                     context.postContent || context.postCaption || '';
@@ -103,9 +104,9 @@ Generate 3 placeholder replies that the user should customize. Make them templat
 
     let prompt = `PLATFORM: ${context.platform || 'social media'}\n\n`;
 
-    // Primary content to reply to
+    // Primary content to reply to - use configurable limit
     if (content) {
-      prompt += `>>> POST/COMMENT TO REPLY TO:\n"${content.substring(0, 600)}"\n\n`;
+      prompt += `>>> POST/COMMENT TO REPLY TO:\n"${content.substring(0, maxContextLength)}"\n\n`;
     }
 
     // Additional context
@@ -113,10 +114,10 @@ Generate 3 placeholder replies that the user should customize. Make them templat
       prompt += `Author: ${author}\n`;
     }
     if (title && title !== content) {
-      prompt += `Title: ${title}\n`;
+      prompt += `Title: ${title.substring(0, 500)}\n`;
     }
     if (description && description !== content) {
-      prompt += `Context: ${description.substring(0, 200)}\n`;
+      prompt += `Context: ${description.substring(0, Math.floor(maxContextLength / 4))}\n`;
     }
 
     prompt += `
@@ -189,9 +190,11 @@ Reply format:
       const settings = await storage.getSettings();
       const userProfile = await storage.getUserProfile();
       const selectedModel = settings.selectedModel || this.model;
+      const maxContextLength = settings.maxContextLength || 2000;
+      const maxCompletionTokens = settings.maxCompletionTokens || API_CONFIG.MAX_TOKENS_REASONING;
 
       const systemPrompt = this.buildSystemPrompt(tone, userProfile);
-      const userPrompt = this.buildUserPrompt(context);
+      const userPrompt = this.buildUserPrompt(context, maxContextLength);
 
       // Debug logging
       console.log('Smart Reply: Sending to API with context:', {
@@ -210,23 +213,23 @@ Reply format:
       let requestBody;
 
       if (isReasoningModel) {
-        // o1/o3 models: combine system and user prompts, no temperature, higher token limit for reasoning
+        // o1/o3 models: combine system and user prompts, no temperature
         requestBody = {
           model: selectedModel,
           messages: [
             { role: 'user', content: `${systemPrompt}\n\n---\n\n${userPrompt}` },
           ],
-          max_completion_tokens: API_CONFIG.MAX_TOKENS_REASONING,
+          max_completion_tokens: maxCompletionTokens,
         };
       } else if (isGpt5Model) {
-        // GPT-5 models: use max_completion_tokens, no custom temperature, higher token limit for reasoning
+        // GPT-5 models: use max_completion_tokens, no custom temperature
         requestBody = {
           model: selectedModel,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          max_completion_tokens: API_CONFIG.MAX_TOKENS_REASONING,
+          max_completion_tokens: maxCompletionTokens,
         };
       } else {
         // Legacy models (GPT-4, GPT-3.5): use max_tokens

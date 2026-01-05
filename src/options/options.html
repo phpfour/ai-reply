@@ -127,6 +127,48 @@
               <span>Slow</span>
             </div>
           </div>
+
+          <div class="options__field">
+            <label class="options__label" for="max-context-length">
+              Max Context Length
+              <span class="options__label-value" id="max-context-length-value">2000</span>
+            </label>
+            <input
+              type="range"
+              id="max-context-length"
+              class="options__range"
+              min="500"
+              max="8000"
+              step="500"
+              value="2000"
+            >
+            <div class="options__range-labels">
+              <span>500 chars</span>
+              <span>8000 chars</span>
+            </div>
+            <p class="options__help">Maximum characters of post content to include in prompt</p>
+          </div>
+
+          <div class="options__field">
+            <label class="options__label" for="max-completion-tokens">
+              Max Completion Tokens
+              <span class="options__label-value" id="max-completion-tokens-value">4000</span>
+            </label>
+            <input
+              type="range"
+              id="max-completion-tokens"
+              class="options__range"
+              min="1000"
+              max="16000"
+              step="1000"
+              value="4000"
+            >
+            <div class="options__range-labels">
+              <span>1000</span>
+              <span>16000</span>
+            </div>
+            <p class="options__help">Maximum tokens for AI response (higher = longer replies possible, more cost)</p>
+          </div>
         </div>
       </section>
 
