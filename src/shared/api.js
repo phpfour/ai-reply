@@ -204,12 +204,13 @@ Reply format:
       });
       console.log('Smart Reply: User prompt:', userPrompt);
 
-      // Build request body - o1 models don't support system messages or temperature
-      const isO1Model = selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+      // Build request body - newer models use different parameters
+      const isReasoningModel = selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+      const isGpt5Model = selectedModel.startsWith('gpt-5');
       let requestBody;
 
-      if (isO1Model) {
-        // o1 models: combine system and user prompts, no temperature
+      if (isReasoningModel) {
+        // o1/o3 models: combine system and user prompts, no temperature
         requestBody = {
           model: selectedModel,
           messages: [
@@ -217,8 +218,19 @@ Reply format:
           ],
           max_completion_tokens: API_CONFIG.MAX_TOKENS,
         };
+      } else if (isGpt5Model) {
+        // GPT-5 models: use max_completion_tokens instead of max_tokens
+        requestBody = {
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_completion_tokens: API_CONFIG.MAX_TOKENS,
+          temperature: 0.9,
+        };
       } else {
-        // Standard models: use system message and temperature
+        // Legacy models (GPT-4, GPT-3.5): use max_tokens
         requestBody = {
           model: selectedModel,
           messages: [
